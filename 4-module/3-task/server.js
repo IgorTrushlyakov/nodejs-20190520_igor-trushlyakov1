@@ -1,6 +1,7 @@
 const url = require('url');
 const http = require('http');
 const path = require('path');
+const fs = require('fs');
 
 const server = new http.Server();
 
@@ -11,6 +12,26 @@ server.on('request', (req, res) => {
 
   switch (req.method) {
     case 'DELETE':
+
+      if (pathname.match('[\\/]')) {
+        res.statusCode = 400;
+        res.end('path is nested');
+      }
+
+      fs.unlink(filepath, (err) => {
+        if (err) {
+          if (err.code === 'ENOENT') {
+            res.statusCode = 404;
+            res.end('not found');
+          } else {
+            res.statusCode = 500;
+            res.end('server error')
+          }
+        } else {
+          res.statusCode = 200;
+          res.end('ok')
+        }
+      })
 
       break;
 
